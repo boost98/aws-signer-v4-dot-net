@@ -67,7 +67,7 @@ namespace Aws4RequestSigner
             return hex.ToString();
         }
 
-        public async Task<HttpRequestMessage> Sign(HttpRequestMessage request, string service, string region)
+        public async Task<HttpRequestMessage> Sign(HttpRequestMessage request, string service, string region, bool isPayloadHash=false)
         {
             if (string.IsNullOrEmpty(service))
             {
@@ -119,14 +119,19 @@ namespace Aws4RequestSigner
 
             canonical_request.Append(signed_headers + "\n");
 
-            var content = new byte[0];
-            if (request.Content != null) {
-                content = await request.Content.ReadAsByteArrayAsync();
-            }
-            var payload_hash = Hash(content);
+            if(isPayloadHash)
+            {
+                var content = new byte[0];
+                if (request.Content != null) {
+                    content = await request.Content.ReadAsByteArrayAsync();
+                }
+                var payload_hash = Hash(content);
 
-            canonical_request.Append(payload_hash);
-            
+                canonical_request.Append(payload_hash);
+            }
+            else 
+                canonical_request.Append("UNSIGNED-PAYLOAD");
+                
             var credential_scope = $"{datestamp}/{region}/{service}/aws4_request";
                        
             var string_to_sign = $"{algorithm}\n{amzdate}\n{credential_scope}\n" + Hash(Encoding.UTF8.GetBytes(canonical_request.ToString()));
