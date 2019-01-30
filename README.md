@@ -9,7 +9,7 @@ Example of usage:
         RequestUri = new Uri("https://apigateway.execute-api.us-west-2.amazonaws.com/Prod/api/data")
     };
 
-    request = await signer.Sign(request, "execute-api", "us-west-2");
+    request = await signer.Sign(request, "execute-api", "us-west-2", false);
 
     var client = new HttpClient();
     var response = await client.SendAsync(request);
